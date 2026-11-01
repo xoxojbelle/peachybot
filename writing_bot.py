@@ -150,12 +150,12 @@ async def set_goal(interaction: discord.Interaction, goal: float, unit: str = "w
     }
     save_data(data)
 
-    msg = f"📝 Goal set! Your new target is **{fmt(goal)}** {unit}."
+    msg = f"📝 Goal set! {interaction.user.display_name}'s new target is **{fmt(goal)}** {unit}."
     if unit_changed:
         msg += f" Since you switched from {old_unit} to {unit}, your progress was reset to 0."
     elif current:
         msg += f" You're keeping your **{fmt(current)}** {unit} of progress."
-    await interaction.response.send_message(msg + " Good luck!")
+    await interaction.response.send_message(msg + " You got this!")
 
 
 @tree.command(name="add_progress", description="Add to your current progress")
@@ -182,7 +182,7 @@ async def add_progress(interaction: discord.Interaction, amount: float):
     entry["username"] = display_name(interaction.user)
     save_data(data)
 
-    msg = f"✍️ Added **{fmt(amount)}** {unit}!\n\n{progress_lines(entry)}"
+    msg = f"➕ Added **{fmt(amount)}** {unit}!\n\n{progress_lines(entry)}"
     if entry["current"] >= entry["goal"]:
         msg += "\n\n🎉 **Congratulations! You hit your goal!**"
     await interaction.response.send_message(msg)
@@ -247,7 +247,7 @@ async def status(interaction: discord.Interaction):
         await interaction.response.send_message(NO_GOAL_MSG, ephemeral=True)
         return
 
-    msg = f"📖 **{interaction.user.display_name}'s Progress:**\n\n{progress_lines(entry)}"
+    msg = f"📝 **{interaction.user.display_name}'s Progress:**\n\n{progress_lines(entry)}"
     await interaction.response.send_message(msg)
 
 
@@ -279,7 +279,7 @@ async def leaderboard(interaction: discord.Interaction, unit: Optional[str] = No
 
     medals = {1: "🥇 ", 2: "🥈 ", 3: "🥉 "}
     lines = [
-        "🏆 **Server Writing Leaderboard** 🏆",
+        "🍑 **Peachy Leaderboard** 🏆",
         f"*{subtitle}*",
         "--------------------------------------",
     ]
