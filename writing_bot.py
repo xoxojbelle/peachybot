@@ -130,12 +130,9 @@ def make_embed(description, *, title=None, color=COLOR_PROGRESS, author_user=Non
         title=title,
         description=description,
         color=color,
-        timestamp=discord.utils.utcnow(),
     )
     if author_user is not None:
         embed.set_author(name=display_name(author_user), icon_url=author_user.display_avatar.url)
-    if thumbnail_user is not None:
-        embed.set_thumbnail(url=thumbnail_user.display_avatar.url)
     return embed
 
 
@@ -192,7 +189,7 @@ async def set_goal(interaction: discord.Interaction, goal: float, unit: str = "w
         msg += f" You're keeping your **{fmt(current)}** {unit} of progress."
     msg += " You got this!"
 
-    embed = make_embed(msg, title="📝 Goal set!", thumbnail_user=interaction.user)
+    embed = make_embed(msg, title="📝 Goal set!")
     await interaction.response.send_message(embed=embed)
 
 
@@ -308,7 +305,6 @@ async def status(interaction: discord.Interaction):
     embed = make_embed(
         progress_lines(entry),
         title=f"📝 {interaction.user.display_name}'s Progress",
-        thumbnail_user=interaction.user,
     )
     await interaction.response.send_message(embed=embed)
 
