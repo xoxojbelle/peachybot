@@ -189,7 +189,7 @@ async def set_goal(interaction: discord.Interaction, goal: float, unit: str = "w
         msg += f" You're keeping your **{fmt(current)}** {unit} of progress."
     msg += " You got this!"
 
-    embed = make_embed(desc, msg, title="📝 Goal set!", thumbnail_user=interaction.user)
+    embed = make_embed(msg, title="📝 Goal set!", thumbnail_user=interaction.user)
     await interaction.response.send_message(embed=embed)
 
 
