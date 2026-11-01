@@ -273,7 +273,7 @@ async def set_progress(interaction: discord.Interaction, total: float):
 
     embed = make_embed(
         desc,
-        title=f"✏️ {interaction.user.display_name}'s Total Updated to {fmt(total)} {unit}",
+        title=f"📋 {interaction.user.display_name}'s Total Updated to {fmt(total)} {unit}",
         color=COLOR_SUCCESS if reached else COLOR_PROGRESS,
     )
     await interaction.response.send_message(embed=embed)
@@ -289,7 +289,7 @@ async def status(interaction: discord.Interaction):
 
     embed = make_embed(
         progress_lines(entry),
-        title=f"✏️ {interaction.user.display_name}'s Progress",
+        title=f"📋 {interaction.user.display_name}'s Progress",
     )
     await interaction.response.send_message(embed=embed)
 
