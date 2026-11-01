@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from typing import Optional
 
 import discord
@@ -85,6 +86,34 @@ def get_percentage(current, goal):
 
 def display_name(user):
     return user.global_name or user.name
+
+
+# Matches emoji, plus the invisible characters that glue them together
+# (variation selectors, zero-width joiners, skin tones, flags, keycaps)
+EMOJI_PATTERN = re.compile(
+    "["
+    "\U0001F000-\U0001FAFF"  # emoticons, pictographs, transport, flags, newer emoji
+    "\U00002600-\U000027BF"  # misc symbols and dingbats (e.g. sparkles, hearts)
+    "\U00002300-\U000023FF"  # misc technical (e.g. watch, hourglass)
+    "\U00002B00-\U00002BFF"  # stars, squares, arrows
+    "\U00002190-\U000021FF"  # arrows
+    "\U0001F1E6-\U0001F1FF"  # regional indicators (flags)
+    "\U000E0020-\U000E007F"  # flag tag characters
+    "\u200d\ufe0f\ufe0e\u20e3"  # joiner, variation selectors, keycap
+    "\u00a9\u00ae\u203c\u2049\u2122\u2139\u3030\u303d\u3297\u3299"
+    "]+"
+)
+
+
+def strip_emoji(text):
+    """Remove emoji and tidy the leftover spaces: '🍑 Jane ✨' -> 'Jane'"""
+    return " ".join(EMOJI_PATTERN.sub("", text).split())
+
+
+def clean_name(user):
+    """A user's server nickname without emoji, for use in embed titles.
+    Falls back to their account name if the nickname was only emoji."""
+    return strip_emoji(user.display_name) or user.global_name or user.name
 
 
 def normalize_amount(value, unit):
@@ -177,7 +206,7 @@ async def set_goal(interaction: discord.Interaction, goal: float, unit: str = "w
         msg += f" You're keeping your **{fmt(current)}** {unit} of progress."
     msg += " You got this!"
 
-    embed = make_embed(msg, title=f"{interaction.user.display_name}'s Goal is Set📝")
+    embed = make_embed(msg, title=f"📝 {clean_name(interaction.user)}'s Goal is Set")
     await interaction.response.send_message(embed=embed)
 
 
@@ -212,7 +241,7 @@ async def add_progress(interaction: discord.Interaction, amount: float):
 
     embed = make_embed(
         desc,
-        title=f"{interaction.user.display_name} Added {fmt(amount)} {unit}!➕",
+        title=f"➕ {clean_name(interaction.user)} Added {fmt(amount)} {unit}!",
         color=COLOR_SUCCESS if reached else COLOR_PROGRESS,
     )
     await interaction.response.send_message(embed=embed)
@@ -238,7 +267,7 @@ async def undo(interaction: discord.Interaction):
 
     embed = make_embed(
         progress_lines(entry),
-        title=f"{interaction.user.display_name} Removed {fmt(last_add)} {unit}↩️ ",
+        title=f"↩️ {clean_name(interaction.user)} Removed {fmt(last_add)} {unit}",
         color=COLOR_UNDO,
     )
     await interaction.response.send_message(embed=embed)
@@ -273,7 +302,7 @@ async def set_progress(interaction: discord.Interaction, total: float):
 
     embed = make_embed(
         desc,
-        title=f"{interaction.user.display_name}'s Total Updated to {fmt(total)} {unit}📋 ",
+        title=f"✏️ {clean_name(interaction.user)}'s Total Updated to {fmt(total)} {unit}",
         color=COLOR_SUCCESS if reached else COLOR_PROGRESS,
     )
     await interaction.response.send_message(embed=embed)
@@ -289,7 +318,7 @@ async def status(interaction: discord.Interaction):
 
     embed = make_embed(
         progress_lines(entry),
-        title=f"{interaction.user.display_name}'s Progress 📋",
+        title=f"✏️ {clean_name(interaction.user)}'s Progress",
     )
     await interaction.response.send_message(embed=embed)
 
@@ -327,8 +356,9 @@ async def leaderboard(interaction: discord.Interaction, unit: Optional[str] = No
         prefix = medals.get(rank, f"**#{rank}** ")
         entry_unit = info.get("unit", "words")
         pct = get_percentage(info["current"], info["goal"])
+        name = strip_emoji(info["username"]) or info["username"]
         lines.append(
-            f"{prefix}**{info['username']}**: {fmt(info['current'])} / {fmt(info['goal'])} {entry_unit} ({pct}%)"
+            f"{prefix}**{name}**: {fmt(info['current'])} / {fmt(info['goal'])} {entry_unit} ({pct}%)"
         )
 
     if len(entries) > LEADERBOARD_SIZE:
