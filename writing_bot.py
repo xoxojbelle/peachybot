@@ -119,21 +119,9 @@ def progress_lines(entry):
 
 # ---------- Embed helpers ----------
 
-def make_embed(description, *, title=None, color=COLOR_PROGRESS, author_user=None, thumbnail_user=None):
-    """Build an embed in the style of Carl-bot's: colored stripe on the left,
-    optional user name + avatar at the top, and a timestamp in the footer.
-
-    author_user    -> small name + avatar line above the title
-    thumbnail_user -> avatar in the top-right corner (used when the title already names the user)
-    """
-    embed = discord.Embed(
-        title=title,
-        description=description,
-        color=color,
-    )
-    if author_user is not None:
-        embed.set_author(name=display_name(author_user), icon_url=author_user.display_avatar.url)
-    return embed
+def make_embed(description, *, title=None, color=COLOR_PROGRESS):
+    """Build an embed with a colored stripe on the left, a title, and a description."""
+    return discord.Embed(title=title, description=description, color=color)
 
 
 async def send_notice(interaction, message, color=COLOR_ERROR):
@@ -182,14 +170,14 @@ async def set_goal(interaction: discord.Interaction, goal: float, unit: str = "w
     }
     save_data(data)
 
-    msg = f" Your new target is **{fmt(goal)}** {unit}."
+    msg = f"Your new target is **{fmt(goal)}** {unit}."
     if unit_changed:
         msg += f" Since you switched from {old_unit} to {unit}, your progress was reset to 0."
     elif current:
         msg += f" You're keeping your **{fmt(current)}** {unit} of progress."
     msg += " You got this!"
 
-    embed = make_embed(msg, title="📝 {interaction.user.display_name}'s Goal is Set!", thumbnail_user=interaction.user)
+    embed = make_embed(msg, title=f"📝 {interaction.user.display_name}'s Goal is Set")
     await interaction.response.send_message(embed=embed)
 
 
@@ -223,9 +211,9 @@ async def add_progress(interaction: discord.Interaction, amount: float):
         desc += "\n\n🎉 **Congratulations! You hit your goal!**"
 
     embed = make_embed(
+        desc,
         title=f"➕ {interaction.user.display_name} Added {fmt(amount)} {unit}!",
         color=COLOR_SUCCESS if reached else COLOR_PROGRESS,
-        thumbnail_user=interaction.user,
     )
     await interaction.response.send_message(embed=embed)
 
@@ -250,9 +238,8 @@ async def undo(interaction: discord.Interaction):
 
     embed = make_embed(
         progress_lines(entry),
-        title=f"↩️ Removed {fmt(last_add)} {unit}",
+        title=f"↩️ {interaction.user.display_name} Removed {fmt(last_add)} {unit}",
         color=COLOR_UNDO,
-        author_user=interaction.user,
     )
     await interaction.response.send_message(embed=embed)
 
@@ -285,9 +272,9 @@ async def set_progress(interaction: discord.Interaction, total: float):
         desc += "\n\n🎉 **Congratulations! You hit your goal!**"
 
     embed = make_embed(
+        desc,
         title=f"✏️ {interaction.user.display_name}'s Total Updated to {fmt(total)} {unit}",
         color=COLOR_SUCCESS if reached else COLOR_PROGRESS,
-        thumbnail_user=interaction.user,
     )
     await interaction.response.send_message(embed=embed)
 
@@ -302,8 +289,7 @@ async def status(interaction: discord.Interaction):
 
     embed = make_embed(
         progress_lines(entry),
-        title=f"📝 {interaction.user.display_name}'s Progress",
-        thumbnail_user=interaction.user,
+        title=f"✏️ {interaction.user.display_name}'s Progress",
     )
     await interaction.response.send_message(embed=embed)
 
