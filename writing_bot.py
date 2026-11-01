@@ -4,6 +4,7 @@ from typing import Optional
 
 import discord
 from discord import app_commands
+from keep_alive import keep_alive 
 
 DATA_FILE = "goals.json"
 LEADERBOARD_SIZE = 15
@@ -298,7 +299,7 @@ async def leaderboard(interaction: discord.Interaction, unit: Optional[str] = No
 
 
 # ---------- 4. Run ----------
-
+keep_alive()
 # Set your token as an environment variable instead of pasting it in the file:
 #   export DISCORD_BOT_TOKEN="your-token"
 client.run(os.environ["DISCORD_TOKEN"])
