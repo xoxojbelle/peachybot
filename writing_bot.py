@@ -112,8 +112,8 @@ def progress_lines(entry):
     current, goal = entry["current"], entry["goal"]
     unit = entry.get("unit", "words")
     return (
-        f"{make_progress_bar(current, goal)}  **{get_percentage(current, goal)}%**\n"
-        f"📊 **{fmt(current)}** / **{fmt(goal)}** {unit}"
+        f"{make_progress_bar(current, goal)}  {get_percentage(current, goal)}%\n"
+        f"📊 {fmt(current)} / {fmt(goal)} {unit}"
     )
 
 
@@ -182,14 +182,18 @@ async def set_goal(interaction: discord.Interaction, goal: float, unit: str = "w
     }
     save_data(data)
 
-    msg = f"{interaction.user.display_name}'s new target is **{fmt(goal)}** {unit}."
+    msg = f" Your new target is **{fmt(goal)}** {unit}."
     if unit_changed:
         msg += f" Since you switched from {old_unit} to {unit}, your progress was reset to 0."
     elif current:
         msg += f" You're keeping your **{fmt(current)}** {unit} of progress."
     msg += " You got this!"
 
-    embed = make_embed(msg, title="📝 Goal set!")
+    embed = make_embed(
+        desc,
+        msg,
+        title="📝 Goal set!",
+    )
     await interaction.response.send_message(embed=embed)
 
 
